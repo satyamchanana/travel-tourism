@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { GoogleMap, LoadScript, Marker, InfoWindow } from '@react-google-maps/api'
 import { useState } from 'react'
 
-const MAPS_API_KEY = "AIzaSyCmQ2TwgmORwha1pH2GIyqlsgauQwJEG00"
+const MAPS_API_KEY = import.meta.env.VITE_MAPS_API_KEY
 
 const destinationsData = {
   1: {
