@@ -13,6 +13,10 @@ const Contact = () => {
       alert('Please fill in all required fields!')
       return
     }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+    alert("Please enter a valid email address!")
+    return
+  }
     setStatus('loading')
     try {
       await addDoc(collection(db, 'contacts'), {
@@ -94,8 +98,8 @@ const Contact = () => {
             <div className="flex flex-col gap-5">
               {[
                 ["📍", "Address", "Seth Jai Parkash Polytechnic, Damla, Haryana, India"],
-                ["📧", "Email", "hello@wanderindia.com"],
-                ["📞", "Phone", "+91 98765 43210"],
+                ["📧", "Email", "satyam@sjpdamla.ac.in"],
+                ["📞", "Phone", "+91 83960 19122"],
                 ["🕒", "Support Hours", "Mon - Sat, 9:00 AM to 6:00 PM IST"],
               ].map(([icon, label, value]) => (
                 <div key={label} className="flex items-start gap-4">
@@ -133,11 +137,7 @@ const Contact = () => {
         </div>
       </div>
 
-      {/* FOOTER */}
-      <footer className="bg-gray-800 text-gray-300 text-center py-6">
-        <p className="text-lg font-semibold text-white mb-1">🌍 WanderIndia</p>
-        <p className="text-sm">© 2026 WanderIndia. All rights reserved.</p>
-      </footer>
+
     </div>
   )
 }

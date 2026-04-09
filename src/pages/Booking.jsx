@@ -28,24 +28,40 @@ const Booking = () => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = async () => {
-    if (!form.name || !form.email || !form.phone || !form.destination || !form.package || !form.checkIn || !form.checkOut) {
-      alert("Please fill in all required fields!")
-      return
-    }
-    setStatus('loading')
-    try {
-      await addDoc(collection(db, "bookings"), {
-        ...form,
-        bookedAt: new Date().toISOString()
-      })
-      setStatus('success')
-      setForm({ name: "", email: "", phone: "", destination: preSelected, package: "", travelers: "1", checkIn: "", checkOut: "", message: "" })
-    } catch (err) {
-      console.error(err)
-      setStatus('error')
-    }
+const handleSubmit = async () => {
+  if (!form.name || !form.email || !form.phone || !form.destination || !form.package || !form.checkIn || !form.checkOut) {
+    alert("Please fill in all required fields!")
+    return
   }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+    alert("Please enter a valid email address!")
+    return
+  }
+  if (!/^[0-9]{10}$/.test(form.phone.replace(/\s/g, ''))) {
+    alert("Please enter a valid 10-digit phone number!")
+    return
+  }
+  if (new Date(form.checkOut) <= new Date(form.checkIn)) {
+    alert("Check-out date must be after check-in date!")
+    return
+  }
+  if (new Date(form.checkIn) < new Date()) {
+    alert("Check-in date cannot be in the past!")
+    return
+  }
+  setStatus('loading')
+  try {
+    await addDoc(collection(db, "bookings"), {
+      ...form,
+      bookedAt: new Date().toISOString()
+    })
+    setStatus('success')
+    setForm({ name: "", email: "", phone: "", destination: preSelected, package: "", travelers: "1", checkIn: "", checkOut: "", message: "" })
+  } catch (err) {
+    console.error(err)
+    setStatus('error')
+  }
+}
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -197,11 +213,6 @@ const Booking = () => {
         </div>
       </div>
 
-      {/* FOOTER */}
-      <footer className="bg-gray-800 text-gray-300 text-center py-6">
-        <p className="text-lg font-semibold text-white mb-1">🌍 WanderIndia</p>
-        <p className="text-sm">© 2026 WanderIndia. All rights reserved.</p>
-      </footer>
 
     </div>
   )

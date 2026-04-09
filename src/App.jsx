@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
+import Footer from './components/Footer'
+import FloatingButtons from './components/FloatingButtons'
 import Home from './pages/Home'
 import Destinations from './pages/Destinations'
 import Booking from './pages/Booking'
@@ -8,6 +10,7 @@ import Packages from './pages/Packages'
 import About from './pages/About'
 import Contact from './pages/Contact'
 import Admin from './pages/Admin'
+import NotFound from './pages/NotFOund'
 import { AuthProvider } from './context/AuthContext'
 
 function App() {
@@ -15,6 +18,7 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Navbar />
+        <FloatingButtons />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/destinations" element={<Destinations />} />
@@ -24,7 +28,9 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
+        <Footer />
       </BrowserRouter>
     </AuthProvider>
   )

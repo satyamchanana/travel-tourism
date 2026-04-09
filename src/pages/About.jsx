@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom'
 
 const team = [
-  { name: "Your Name", role: "Full Stack Developer", emoji: "👨‍💻", desc: "Built the entire WanderIndia platform from scratch using React and Firebase." },
-  { name: "Team Member 2", role: "UI/UX Designer", emoji: "🎨", desc: "Designed the user experience and visual identity of WanderIndia." },
-  { name: "Team Member 3", role: "Backend Developer", emoji: "🔧", desc: "Architected the Firebase database structure and booking system." },
+  { name: "Satyam Chanana", role: "Full Stack Developer", emoji: "👨‍💻", desc: "Built the entire WanderIndia platform from scratch using React and Firebase." },
+  { name: "Satyam Chanana", role: "UI/UX Designer", emoji: "🎨", desc: "Designed the user experience and visual identity of WanderIndia." },
+  { name: "Neerav Rana", role: "Backend Developer", emoji: "🔧", desc: "Architected the Firebase database structure and booking system." },
 ]
 
 const About = () => {
@@ -104,11 +104,7 @@ const About = () => {
         </div>
       </div>
 
-      {/* FOOTER */}
-      <footer className="bg-gray-900 text-gray-300 text-center py-6">
-        <p className="text-lg font-semibold text-white mb-1">🌍 WanderIndia</p>
-        <p className="text-sm">© 2026 WanderIndia. All rights reserved.</p>
-      </footer>
+
     </div>
   )
 }

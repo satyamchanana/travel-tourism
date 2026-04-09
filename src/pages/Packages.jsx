@@ -74,10 +74,10 @@ const packages = [
 ]
 
 const destinations = [
-  { name: "Goa", img: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=400", trips: "142 trips" },
-  { name: "Manali", img: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=400", trips: "98 trips" },
+  { name: "Goa", img: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=400", trips: "1420 trips" },
+  { name: "Manali", img: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=400", trips: "958 trips" },
   { name: "Kerala", img: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=400", trips: "117 trips" },
-  { name: "Jaipur", img: "https://images.unsplash.com/photo-1477587458883-47145ed94245?w=400", trips: "89 trips" },
+  { name: "Jaipur", img: "https://images.unsplash.com/photo-1477587458883-47145ed94245?w=400", trips: "899 trips" },
 ]
 
 const Packages = () => {
@@ -125,7 +125,7 @@ const Packages = () => {
                   ))}
                 </div>
                 <button
-                  onClick={() => navigate('/booking')}
+                  onClick={() => navigate('/booking', { state: { package: pkg.name } })}
                   className={`mt-6 w-full py-3 rounded-2xl font-bold text-sm transition ${
                     pkg.popular
                       ? 'bg-blue-600 hover:bg-blue-500 text-white'
@@ -180,11 +180,7 @@ const Packages = () => {
         ))}
       </div>
 
-      {/* FOOTER */}
-      <footer className="bg-gray-800 text-gray-300 text-center py-6">
-        <p className="text-lg font-semibold text-white mb-1">🌍 WanderIndia</p>
-        <p className="text-sm">© 2026 WanderIndia. All rights reserved.</p>
-      </footer>
+
     </div>
   )
 }

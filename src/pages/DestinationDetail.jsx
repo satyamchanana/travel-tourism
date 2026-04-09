@@ -343,11 +343,7 @@ const DestinationDetail = () => {
         )}
       </div>
 
-      {/* FOOTER */}
-      <footer className="bg-gray-800 text-gray-300 text-center py-6 mt-10">
-        <p className="text-lg font-semibold text-white mb-1">🌍 WanderIndia</p>
-        <p className="text-sm">© 2025 WanderIndia. All rights reserved.</p>
-      </footer>
+
     </div>
   )
 }

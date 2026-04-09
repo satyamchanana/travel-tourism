@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 const allDestinations = [
   { id: 1, name: "Goa", type: "Beach", img: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=400", rating: 4.8, price: "₹8,000", desc: "Sun, sand and seafood — Goa is India's ultimate beach paradise." },
@@ -16,8 +16,9 @@ const allDestinations = [
 const filters = ["All", "Beach", "Mountain", "Heritage", "Nature", "Adventure"]
 
 const Destinations = () => {
+  const location = useLocation()
   const [active, setActive] = useState("All")
-  const [search, setSearch] = useState("")
+  const [search, setSearch] = useState(location.state?.search || '')
   const navigate = useNavigate()
 
   const filtered = allDestinations.filter(d => {
@@ -104,11 +105,7 @@ const Destinations = () => {
         )}
       </div>
 
-      {/* FOOTER */}
-      <footer className="bg-gray-800 text-gray-300 text-center py-6">
-        <p className="text-lg font-semibold text-white mb-1">🌍 WanderIndia</p>
-        <p className="text-sm">© 2026 WanderIndia. All rights reserved.</p>
-      </footer>
+
 
     </div>
   )
