@@ -28,9 +28,9 @@ const Navbar = () => {
             {l.label}
           </Link>
         ))}
-        <Link to="/admin" className="bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold px-4 py-1.5 rounded-full text-sm transition">
+        {/* <Link to="/admin" className="bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold px-4 py-1.5 rounded-full text-sm transition">
           Admin ⚙️
-        </Link>
+        </Link> */}
       </div>
 
       {/* Mobile hamburger */}

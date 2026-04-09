@@ -39,7 +39,7 @@ const Home = () => {
           <p className="text-xl mb-8 text-gray-200 max-w-xl mx-auto">
             Explore breathtaking destinations, book curated packages and create memories that last a lifetime.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center border-gray-300">
             <input type="text" placeholder="Where do you want to go?"
               value={search}
               onChange={e => setSearch(e.target.value)}

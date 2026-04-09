@@ -27,8 +27,8 @@ const Footer = () => {
         <div>
           <h4 className="text-white font-bold mb-3">Contact</h4>
           <div className="flex flex-col gap-2 text-sm text-gray-400">
-            <span>📧 hello@wanderindia.com</span>
-            <span>📞 +91 98765 43210</span>
+            <span>📧 satyam@sjpdamla.ac.in</span>
+            <span>📞 +91 83960 19122</span>
             <span>🕒 Mon-Sat, 9AM - 6PM IST</span>
             <Link to="/contact" className="text-blue-400 hover:text-blue-300 transition mt-1">Send us a message →</Link>
           </div>

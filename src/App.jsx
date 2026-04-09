@@ -12,7 +12,7 @@ import Contact from './pages/Contact'
 import Admin from './pages/Admin'
 import NotFound from './pages/NotFOund'
 import { AuthProvider } from './context/AuthContext'
-
+import Seed from './pages/Seed'
 function App() {
   return (
     <AuthProvider>
@@ -29,6 +29,9 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<NotFound />} />
+
+          {/* <Route path="/seed" element={<Seed />} /> */}
+
         </Routes>
         <Footer />
       </BrowserRouter>
