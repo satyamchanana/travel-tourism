@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore'
+import { collection, getDocs, deleteDoc, doc, addDoc } from 'firebase/firestore'
 import { db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
 
@@ -41,31 +41,20 @@ const AdminLogin = ({ onLogin }) => {
         <div className="flex flex-col gap-4">
           <div>
             <label className="text-gray-400 text-sm mb-1 block">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleLogin()}
               placeholder="admin@wanderindia.com"
-              className="w-full bg-gray-700 text-white px-4 py-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition"
-            />
+              className="w-full bg-gray-700 text-white px-4 py-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition" />
           </div>
           <div>
             <label className="text-gray-400 text-sm mb-1 block">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleLogin()}
               placeholder="••••••••"
-              className="w-full bg-gray-700 text-white px-4 py-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition"
-            />
+              className="w-full bg-gray-700 text-white px-4 py-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition" />
           </div>
-          <button
-            onClick={handleLogin}
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-blue-900 text-white font-bold py-3 rounded-xl transition mt-2 text-lg"
-          >
+          <button onClick={handleLogin} disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-blue-900 text-white font-bold py-3 rounded-xl transition mt-2 text-lg">
             {loading ? 'Logging in...' : 'Login →'}
           </button>
         </div>
@@ -84,6 +73,8 @@ const Admin = () => {
   const [loggedIn, setLoggedIn] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const [activeTab, setActiveTab] = useState('bookings')
+  const [newDest, setNewDest] = useState({ name: '', type: 'Beach', img: '', price: '', rating: '', desc: '', bestTime: '', duration: '', lat: '', lng: '' })
+  const [addStatus, setAddStatus] = useState(null)
 
   useEffect(() => {
     if (user) { setLoggedIn(true); fetchBookings() }
@@ -119,9 +110,39 @@ const Admin = () => {
     navigate('/')
   }
 
+  const handleAddDestination = async () => {
+    if (!newDest.name || !newDest.img || !newDest.price) {
+      alert('Please fill name, image and price at minimum!')
+      return
+    }
+    setAddStatus('loading')
+    try {
+      const cleanSpots = (newDest.spots || []).filter(s => s.name?.trim())
+      await addDoc(collection(db, 'destinations'), {
+        name: newDest.name,
+        type: newDest.type,
+        img: newDest.img,
+        desc: newDest.desc,
+        price: Number(newDest.price),
+        rating: Number(newDest.rating) || 4.5,
+        lat: Number(newDest.lat) || 0,
+        lng: Number(newDest.lng) || 0,
+        bestTime: newDest.bestTime || '',
+        duration: newDest.duration || '',
+        highlights: newDest.highlights || [],
+        spots: cleanSpots,
+      })
+      setAddStatus('success')
+      setNewDest({ name: '', type: 'Beach', img: '', price: '', rating: '', desc: '', bestTime: '', duration: '', lat: '', lng: '', highlights: [], spots: [], _highlightInput: '' })
+    } catch (e) {
+      console.error(e)
+      setAddStatus('error')
+    }
+  }
+
   if (!user && !loggedIn) return <AdminLogin onLogin={() => setLoggedIn(true)} />
 
-  const destinations = ['All', ...new Set(bookings.map(b => b.destination))]
+  const destOptions = ['All', ...new Set(bookings.map(b => b.destination))]
   const filtered = bookings.filter(b => {
     const matchSearch = b.name?.toLowerCase().includes(search.toLowerCase()) ||
       b.email?.toLowerCase().includes(search.toLowerCase()) ||
@@ -130,7 +151,6 @@ const Admin = () => {
     return matchSearch && matchDest
   })
 
-  // Stats
   const totalBookings = bookings.length
   const destinations_set = new Set(bookings.map(b => b.destination)).size
   const totalTravelers = bookings.reduce((sum, b) => sum + (parseInt(b.travelers) || 1), 0)
@@ -152,16 +172,12 @@ const Admin = () => {
         </div>
         <div className="flex items-center gap-4">
           <span className="text-gray-400 text-sm hidden md:block">{user?.email}</span>
-          <button
-            onClick={fetchBookings}
-            className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm transition"
-          >
+          <button onClick={fetchBookings}
+            className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm transition">
             🔄 Refresh
           </button>
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-lg text-sm font-semibold transition"
-          >
+          <button onClick={handleLogout}
+            className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-lg text-sm font-semibold transition">
             Logout
           </button>
         </div>
@@ -172,10 +188,10 @@ const Admin = () => {
         {/* STATS */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
-            { label: "Total Bookings", value: totalBookings, icon: "📋", color: "blue" },
-            { label: "Destinations Booked", value: destinations_set, icon: "🗺️", color: "green" },
-            { label: "Total Travelers", value: totalTravelers, icon: "👥", color: "purple" },
-            { label: "This Month", value: thisMonth, icon: "📅", color: "yellow" },
+            { label: "Total Bookings", value: totalBookings, icon: "📋" },
+            { label: "Destinations Booked", value: destinations_set, icon: "🗺️" },
+            { label: "Total Travelers", value: totalTravelers, icon: "👥" },
+            { label: "This Month", value: thisMonth, icon: "📅" },
           ].map(stat => (
             <div key={stat.label} className="bg-gray-800 rounded-2xl p-5 border border-gray-700">
               <div className="text-3xl mb-2">{stat.icon}</div>
@@ -187,12 +203,18 @@ const Admin = () => {
 
         {/* TABS */}
         <div className="flex gap-2 mb-6 border-b border-gray-700">
-          {['bookings', 'analytics'].map(tab => (
-            <button key={tab} onClick={() => setActiveTab(tab)}
-              className={`px-6 py-3 font-semibold capitalize text-sm border-b-2 transition ${
-                activeTab === tab ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-300'
+          {[
+            { key: 'bookings', label: '📋 All Bookings' },
+            { key: 'analytics', label: '📊 Analytics' },
+            { key: 'destinations', label: '🌍 Add Destination' },
+          ].map(tab => (
+            <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+              className={`px-6 py-3 font-semibold text-sm border-b-2 transition ${
+                activeTab === tab.key
+                  ? 'border-blue-500 text-blue-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-300'
               }`}>
-              {tab === 'bookings' ? '📋 All Bookings' : '📊 Analytics'}
+              {tab.label}
             </button>
           ))}
         </div>
@@ -200,25 +222,16 @@ const Admin = () => {
         {/* BOOKINGS TAB */}
         {activeTab === 'bookings' && (
           <>
-            {/* FILTERS */}
             <div className="flex flex-col sm:flex-row gap-3 mb-6">
-              <input
-                type="text"
+              <input type="text"
                 placeholder="Search by name, email or destination..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="bg-gray-800 border border-gray-700 text-white px-4 py-2.5 rounded-xl outline-none focus:border-blue-500 transition flex-1"
-              />
-              <select
-                value={filterDest}
-                onChange={e => setFilterDest(e.target.value)}
-                className="bg-gray-800 border border-gray-700 text-white px-4 py-2.5 rounded-xl outline-none focus:border-blue-500 transition"
-              >
-                {destinations.map(d => <option key={d} value={d}>{d}</option>)}
+                value={search} onChange={e => setSearch(e.target.value)}
+                className="bg-gray-800 border border-gray-700 text-white px-4 py-2.5 rounded-xl outline-none focus:border-blue-500 transition flex-1" />
+              <select value={filterDest} onChange={e => setFilterDest(e.target.value)}
+                className="bg-gray-800 border border-gray-700 text-white px-4 py-2.5 rounded-xl outline-none focus:border-blue-500 transition">
+                {destOptions.map(d => <option key={d} value={d}>{d}</option>)}
               </select>
             </div>
-
-            {/* TABLE */}
             {loading ? (
               <div className="text-center text-gray-400 py-20 text-xl">Loading bookings... ⏳</div>
             ) : filtered.length === 0 ? (
@@ -257,10 +270,8 @@ const Admin = () => {
                           </div>
                         </div>
                       </div>
-                      <button
-                        onClick={() => setDeleteConfirm(b.id)}
-                        className="bg-red-600/20 hover:bg-red-600 border border-red-600 text-red-400 hover:text-white px-4 py-2 rounded-xl text-sm font-semibold transition whitespace-nowrap"
-                      >
+                      <button onClick={() => setDeleteConfirm(b.id)}
+                        className="bg-red-600/20 hover:bg-red-600 border border-red-600 text-red-400 hover:text-white px-4 py-2 rounded-xl text-sm font-semibold transition whitespace-nowrap">
                         🗑️ Delete
                       </button>
                     </div>
@@ -279,8 +290,6 @@ const Admin = () => {
         {/* ANALYTICS TAB */}
         {activeTab === 'analytics' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-            {/* Top Destinations */}
             <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
               <h3 className="text-lg font-bold mb-4 text-white">🏆 Top Destinations</h3>
               {(() => {
@@ -288,24 +297,19 @@ const Admin = () => {
                 bookings.forEach(b => { counts[b.destination] = (counts[b.destination] || 0) + 1 })
                 const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5)
                 const max = sorted[0]?.[1] || 1
-                return sorted.length === 0 ? (
-                  <p className="text-gray-500">No data yet</p>
-                ) : sorted.map(([dest, count]) => (
+                return sorted.length === 0 ? <p className="text-gray-500">No data yet</p> : sorted.map(([dest, count]) => (
                   <div key={dest} className="mb-3">
                     <div className="flex justify-between text-sm mb-1">
                       <span className="text-gray-300">{dest}</span>
                       <span className="text-blue-400 font-semibold">{count} booking{count > 1 ? 's' : ''}</span>
                     </div>
                     <div className="bg-gray-700 rounded-full h-2">
-                      <div className="bg-blue-500 h-2 rounded-full transition-all duration-500"
-                        style={{ width: `${(count / max) * 100}%` }} />
+                      <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${(count / max) * 100}%` }} />
                     </div>
                   </div>
                 ))
               })()}
             </div>
-
-            {/* Top Packages */}
             <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
               <h3 className="text-lg font-bold mb-4 text-white">📦 Popular Packages</h3>
               {(() => {
@@ -316,24 +320,19 @@ const Admin = () => {
                 })
                 const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1])
                 const max = sorted[0]?.[1] || 1
-                return sorted.length === 0 ? (
-                  <p className="text-gray-500">No data yet</p>
-                ) : sorted.map(([pkg, count]) => (
+                return sorted.length === 0 ? <p className="text-gray-500">No data yet</p> : sorted.map(([pkg, count]) => (
                   <div key={pkg} className="mb-3">
                     <div className="flex justify-between text-sm mb-1">
                       <span className="text-gray-300">{pkg}</span>
                       <span className="text-purple-400 font-semibold">{count} booking{count > 1 ? 's' : ''}</span>
                     </div>
                     <div className="bg-gray-700 rounded-full h-2">
-                      <div className="bg-purple-500 h-2 rounded-full transition-all duration-500"
-                        style={{ width: `${(count / max) * 100}%` }} />
+                      <div className="bg-purple-500 h-2 rounded-full" style={{ width: `${(count / max) * 100}%` }} />
                     </div>
                   </div>
                 ))
               })()}
             </div>
-
-            {/* Recent Activity */}
             <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700 lg:col-span-2">
               <h3 className="text-lg font-bold mb-4 text-white">🕒 Recent Bookings</h3>
               <div className="flex flex-col gap-3">
@@ -358,6 +357,148 @@ const Admin = () => {
             </div>
           </div>
         )}
+
+        {/* DESTINATIONS TAB */}
+      {activeTab === 'destinations' && (
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-gray-800 rounded-2xl p-8 border border-gray-700">
+            <h3 className="text-xl font-bold text-white mb-6">➕ Add New Destination</h3>
+
+            {addStatus === 'success' && (
+              <div className="bg-green-500/20 border border-green-500 text-green-400 px-4 py-3 rounded-xl mb-4 text-sm">
+                ✅ Destination added! It will appear on the site immediately.
+              </div>
+            )}
+
+            {/* BASIC INFO */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              {[
+                ['name', 'Destination Name *', 'text'],
+                ['img', 'Image URL (Unsplash) *', 'text'],
+                ['price', 'Starting Price (₹) *', 'number'],
+                ['rating', 'Rating (e.g. 4.8)', 'number'],
+                ['bestTime', 'Best Time to Visit', 'text'],
+                ['duration', 'Duration (e.g. 3-5 Days)', 'text'],
+                ['lat', 'Latitude', 'number'],
+                ['lng', 'Longitude', 'number'],
+              ].map(([field, label, type]) => (
+                <div key={field}>
+                  <label className="text-gray-400 text-xs mb-1 block">{label}</label>
+                  <input type={type} value={newDest[field]}
+                    onChange={e => setNewDest(p => ({ ...p, [field]: e.target.value }))}
+                    className="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2.5 rounded-xl outline-none focus:border-blue-500 text-sm transition" />
+                </div>
+              ))}
+              <div className="sm:col-span-2">
+                <label className="text-gray-400 text-xs mb-1 block">Type</label>
+                <select value={newDest.type}
+                  onChange={e => setNewDest(p => ({ ...p, type: e.target.value }))}
+                  className="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2.5 rounded-xl outline-none focus:border-blue-500 text-sm">
+                  {["Beach", "Mountain", "Heritage", "Nature", "Adventure"].map(t => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="sm:col-span-2">
+                <label className="text-gray-400 text-xs mb-1 block">Description</label>
+                <textarea value={newDest.desc}
+                  onChange={e => setNewDest(p => ({ ...p, desc: e.target.value }))}
+                  rows={3}
+                  className="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2.5 rounded-xl outline-none focus:border-blue-500 text-sm resize-none transition" />
+              </div>
+            </div>
+
+            {/* HIGHLIGHTS */}
+            <div className="mb-6">
+              <label className="text-gray-300 text-sm font-semibold mb-2 block">✨ Highlights</label>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  placeholder="e.g. Beach Shacks"
+                  value={newDest._highlightInput || ''}
+                  onChange={e => setNewDest(p => ({ ...p, _highlightInput: e.target.value }))}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && newDest._highlightInput?.trim()) {
+                      setNewDest(p => ({ ...p, highlights: [...(p.highlights || []), p._highlightInput.trim()], _highlightInput: '' }))
+                    }
+                  }}
+                  className="flex-1 bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded-xl outline-none focus:border-blue-500 text-sm" />
+                <button
+                  onClick={() => {
+                    if (newDest._highlightInput?.trim()) {
+                      setNewDest(p => ({ ...p, highlights: [...(p.highlights || []), p._highlightInput.trim()], _highlightInput: '' }))
+                    }
+                  }}
+                  className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-sm font-semibold transition">
+                  Add
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {(newDest.highlights || []).map((h, i) => (
+                  <span key={i} className="bg-blue-600/30 text-blue-300 border border-blue-600 px-3 py-1 rounded-full text-xs flex items-center gap-2">
+                    {h}
+                    <button onClick={() => setNewDest(p => ({ ...p, highlights: p.highlights.filter((_, j) => j !== i) }))}
+                      className="text-blue-400 hover:text-red-400 transition font-bold">×</button>
+                  </span>
+                ))}
+              </div>
+              <p className="text-gray-500 text-xs mt-1">Press Enter or click Add after each highlight</p>
+            </div>
+
+            {/* TOURIST SPOTS */}
+            <div className="mb-6">
+              <label className="text-gray-300 text-sm font-semibold mb-3 block">📍 Tourist Spots (up to 5)</label>
+              <div className="flex flex-col gap-3">
+                {[0, 1, 2, 3, 4].map(i => (
+                  <div key={i} className="bg-gray-700/50 rounded-xl p-4 border border-gray-600">
+                    <p className="text-gray-400 text-xs font-semibold mb-2">Spot {i + 1}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <input placeholder="Spot name"
+                        value={newDest.spots?.[i]?.name || ''}
+                        onChange={e => {
+                          const spots = [...(newDest.spots || [{}, {}, {}, {}, {}])]
+                          spots[i] = { ...spots[i], name: e.target.value }
+                          setNewDest(p => ({ ...p, spots }))
+                        }}
+                        className="bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded-lg outline-none focus:border-blue-500 text-xs" />
+                      <input placeholder="Description"
+                        value={newDest.spots?.[i]?.desc || ''}
+                        onChange={e => {
+                          const spots = [...(newDest.spots || [{}, {}, {}, {}, {}])]
+                          spots[i] = { ...spots[i], desc: e.target.value }
+                          setNewDest(p => ({ ...p, spots }))
+                        }}
+                        className="bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded-lg outline-none focus:border-blue-500 text-xs" />
+                      <input placeholder="Latitude" type="number"
+                        value={newDest.spots?.[i]?.lat || ''}
+                        onChange={e => {
+                          const spots = [...(newDest.spots || [{}, {}, {}, {}, {}])]
+                          spots[i] = { ...spots[i], lat: parseFloat(e.target.value) }
+                          setNewDest(p => ({ ...p, spots }))
+                        }}
+                        className="bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded-lg outline-none focus:border-blue-500 text-xs" />
+                      <input placeholder="Longitude" type="number"
+                        value={newDest.spots?.[i]?.lng || ''}
+                        onChange={e => {
+                          const spots = [...(newDest.spots || [{}, {}, {}, {}, {}])]
+                          spots[i] = { ...spots[i], lng: parseFloat(e.target.value) }
+                          setNewDest(p => ({ ...p, spots }))
+                        }}
+                        className="bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded-lg outline-none focus:border-blue-500 text-xs" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button onClick={handleAddDestination} disabled={addStatus === 'loading'}
+              className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-blue-900 text-white font-bold py-3 rounded-xl transition">
+              {addStatus === 'loading' ? 'Adding...' : 'Add Destination 🌍'}
+            </button>
+          </div>
+        </div>
+      )}
+
       </div>
 
       {/* DELETE CONFIRM MODAL */}

@@ -1,112 +1,140 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-
-const allDestinations = [
-  { id: 1, name: "Goa", type: "Beach", img: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=400", rating: 4.8, price: "₹8,000", desc: "Sun, sand and seafood — Goa is India's ultimate beach paradise." },
-  { id: 2, name: "Manali", type: "Mountain", img: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=400", rating: 4.7, price: "₹10,000", desc: "Snow-capped peaks and adventure sports in the heart of Himachal." },
-  { id: 3, name: "Jaipur", type: "Heritage", img: "https://images.unsplash.com/photo-1477587458883-47145ed94245?w=400", rating: 4.6, price: "₹6,000", desc: "The Pink City — forts, palaces and royal Rajasthani culture." },
-  { id: 4, name: "Kerala", type: "Nature", img: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=400", rating: 4.9, price: "₹12,000", desc: "God's Own Country — backwaters, spices and lush greenery." },
-  { id: 5, name: "Agra", type: "Heritage", img: "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400", rating: 4.7, price: "₹5,000", desc: "Home to the iconic Taj Mahal — a wonder of the world." },
-  { id: 6, name: "Andaman", type: "Beach", img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400", rating: 4.9, price: "₹18,000", desc: "Crystal clear waters and pristine beaches far from the mainland." },
-  { id: 7, name: "Rishikesh", type: "Adventure", img: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400", rating: 4.7, price: "₹7,000", desc: "Yoga capital of the world with thrilling river rafting on the Ganges." },
-  { id: 8, name: "Varanasi", type: "Heritage", img: "https://images.unsplash.com/photo-1561361058-c24e01dc5c8a?w=400", rating: 4.6, price: "₹4,500", desc: "One of the world's oldest cities — spiritual and deeply cultural." },
-  { id: 9, name: "Coorg", type: "Nature", img: "https://images.unsplash.com/photo-1595815771614-ade9d652a65d?w=400", rating: 4.8, price: "₹9,000", desc: "Scotland of India — misty hills, coffee plantations and waterfalls." },
-]
+import { collection, getDocs } from 'firebase/firestore'
+import { db } from '../firebase'
 
 const filters = ["All", "Beach", "Mountain", "Heritage", "Nature", "Adventure"]
 
 const Destinations = () => {
-  const location = useLocation()
   const [active, setActive] = useState("All")
-  const [search, setSearch] = useState(location.state?.search || '')
+  const [search, setSearch] = useState('')
+  const [destinations, setDestinations] = useState([])
+  const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+  const location = useLocation()
 
-  const filtered = allDestinations.filter(d => {
+  useEffect(() => {
+    if (location.state?.search) setSearch(location.state.search)
+  }, [location.state])
+
+  useEffect(() => {
+    const fetch = async () => {
+      const snap = await getDocs(collection(db, 'destinations'))
+      const data = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      setDestinations(data)
+      setLoading(false)
+    }
+    fetch()
+  }, [])
+
+  const filtered = destinations.filter(d => {
     const matchType = active === "All" || d.type === active
     const matchSearch = d.name.toLowerCase().includes(search.toLowerCase())
     return matchType && matchSearch
   })
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#F8F9FA]">
 
       {/* HEADER */}
-      <div className="bg-blue-700 text-white py-14 px-6 text-center">
-        <h1 className="text-5xl font-extrabold mb-3">Explore Destinations</h1>
-        <p className="text-blue-200 text-lg">Find your perfect getaway across India</p>
-        <div className="mt-6 flex justify-center">
-          <input
-            type="text"
+      <div className="bg-[#1B3B6F] text-white py-16 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="text-blue-300 text-sm font-semibold uppercase tracking-widest mb-2">Explore</p>
+          <h1 className="text-5xl font-extrabold mb-4 tracking-tight">All Destinations</h1>
+          <p className="text-blue-200 mb-8">Discover incredible places across the length and breadth of India</p>
+          <input type="text"
             placeholder="Search destinations..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="px-6 py-3 rounded-full text-gray-800 w-80 shadow-lg text-lg outline-none"
-          />
+            className="px-6 py-3.5 rounded-full text-gray-800 w-80 outline-none bg-white shadow-md text-sm" />
         </div>
       </div>
 
-      {/* FILTER TABS */}
-      <div className="flex flex-wrap justify-center gap-3 py-8 px-6">
-        {filters.map(f => (
-          <button
-            key={f}
-            onClick={() => setActive(f)}
-            className={`px-6 py-2 rounded-full font-semibold text-sm transition-all duration-200 ${
-              active === f
-                ? "bg-blue-700 text-white shadow-md scale-105"
-                : "bg-white text-gray-600 border border-gray-200 hover:border-blue-400"
-            }`}
-          >
-            {f}
-          </button>
-        ))}
+      {/* FILTERS */}
+      <div className="bg-white border-b border-gray-100 sticky top-16 z-40">
+        <div className="max-w-7xl mx-auto px-6 flex gap-2 overflow-x-auto py-3 scrollbar-hide">
+          {filters.map(f => (
+            <button key={f} onClick={() => setActive(f)}
+              className={`px-5 py-2 rounded-full font-semibold text-xs whitespace-nowrap transition-all ${
+                active === f
+                  ? 'bg-[#1B3B6F] text-white shadow-sm'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}>
+              {f}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* CARDS */}
-      <div className="max-w-7xl mx-auto px-6 pb-16">
-        {filtered.length === 0 ? (
-          <div className="text-center text-gray-400 text-xl py-20">No destinations found 😕</div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filtered.map(dest => (
-              <div
-                key={dest.id}
-                onClick={() => navigate(`/destinations/${dest.id}`)}
-                className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
-              >
-                <div className="relative">
-                  <img src={dest.img} alt={dest.name} className="w-full h-48 object-cover" />
-                  <span className="absolute top-3 right-3 bg-white text-blue-700 text-xs font-bold px-3 py-1 rounded-full shadow">
-                    {dest.type}
-                  </span>
-                </div>
-                <div className="p-5">
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="text-xl font-bold text-gray-800">{dest.name}</h3>
-                    <span className="text-yellow-500 font-semibold">⭐ {dest.rating}</span>
-                  </div>
-                  <p className="text-gray-500 text-sm mb-4">{dest.desc}</p>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <span className="text-gray-400 text-xs">Starting from</span>
-                      <div className="text-blue-700 font-bold text-lg">{dest.price}</div>
-                    </div>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); navigate('/booking', { state: { destination: dest.name } }) }}
-                      className="bg-blue-700 hover:bg-blue-600 text-white px-5 py-2 rounded-full font-semibold text-sm transition"
-                    >
-                      Book Now
-                    </button>
-                  </div>
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl overflow-hidden animate-pulse border border-gray-100">
+                <div className="bg-gray-200 h-52 w-full" />
+                <div className="p-5 flex flex-col gap-3">
+                  <div className="bg-gray-200 h-4 rounded w-2/3" />
+                  <div className="bg-gray-100 h-3 rounded w-full" />
+                  <div className="bg-gray-100 h-3 rounded w-4/5" />
                 </div>
               </div>
             ))}
           </div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-24">
+            <div className="text-5xl mb-4">🔍</div>
+            <p className="text-gray-400 text-xl font-medium">No destinations found</p>
+            <p className="text-gray-300 text-sm mt-1">Try a different search or filter</p>
+          </div>
+        ) : (
+          <>
+            <p className="text-gray-400 text-sm mb-6">{filtered.length} destination{filtered.length !== 1 ? 's' : ''} found</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filtered.map(dest => (
+                <div key={dest.id}
+                  onClick={() => navigate(`/destinations/${dest.id}`)}
+                  className="bg-white rounded-2xl overflow-hidden cursor-pointer group border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300">
+                  <div className="relative overflow-hidden h-52">
+                    <img src={dest.img} alt={dest.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-[#1B3B6F] text-xs font-bold px-2.5 py-1 rounded-full">
+                      {dest.type}
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <span className="bg-white text-[#1B3B6F] text-xs font-bold px-3 py-1.5 rounded-full shadow">
+                        Explore →
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900">{dest.name}</h3>
+                        <p className="text-gray-400 text-xs mt-0.5">📅 {dest.bestTime} · 🕒 {dest.duration}</p>
+                      </div>
+                      <span className="text-yellow-500 text-sm font-semibold whitespace-nowrap ml-2">⭐ {dest.rating}</span>
+                    </div>
+                    <p className="text-gray-500 text-sm leading-relaxed line-clamp-2 mb-4">{dest.desc}</p>
+                    <div className="flex justify-between items-center pt-3 border-t border-gray-50">
+                      <div>
+                        <p className="text-[#1B3B6F] font-extrabold text-lg">₹{dest.price?.toLocaleString()}</p>
+                        <p className="text-gray-400 text-xs">per person</p>
+                      </div>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); navigate('/booking', { state: { destination: dest.name } }) }}
+                        className="bg-[#1B3B6F] hover:bg-[#2563EB] text-white px-4 py-2 rounded-full font-semibold text-xs transition">
+                        Book Now
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
-
-
-
     </div>
   )
 }

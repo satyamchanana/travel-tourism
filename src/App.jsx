@@ -13,8 +13,10 @@ import Admin from './pages/Admin'
 import NotFound from './pages/NotFOund'
 import { AuthProvider } from './context/AuthContext'
 import Seed from './pages/Seed'
+import { ThemeProvider } from './context/ThemeContext'
 function App() {
   return (
+   <ThemeProvider>
     <AuthProvider>
       <BrowserRouter>
         <Navbar />
@@ -36,6 +38,7 @@ function App() {
         <Footer />
       </BrowserRouter>
     </AuthProvider>
+   </ThemeProvider>
   )
 }
 
