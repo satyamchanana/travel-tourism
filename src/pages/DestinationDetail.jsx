@@ -78,7 +78,8 @@ const DestinationDetail = () => {
   </div>
 </div>
 
-<div className="max-w-6xl mx-auto px-6 py-10 bg-[#F8F9FA] dark:bg-gray-950 min-h-screen transition-colors">
+<div className="bg-[#F8F9FA] dark:bg-gray-950 min-h-screen transition-colors duration-300">
+  <div className="max-w-6xl mx-auto px-6 py-10">
 
   {/* OVERVIEW TAB */}
   {activeTab === 'overview' && (
@@ -207,7 +208,7 @@ const DestinationDetail = () => {
     </div>
   )}
 </div>
-
+</div>
     </div>
   )
 }
