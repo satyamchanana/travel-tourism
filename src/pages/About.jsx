@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 const team = [
   { name: "Satyam Chanana", role: "Full Stack Developer", emoji: "👨‍💻", desc: "Built the entire WanderIndia platform from scratch using React and Firebase." },
   { name: "Satyam Chanana", role: "UI/UX Designer", emoji: "🎨", desc: "Designed the user experience and visual identity of WanderIndia." },
-  { name: "Neerav Rana", role: "Backend Developer", emoji: "🔧", desc: "Architected the Firebase database structure and booking system." },
+  { name: "Satyam Chanana", role: "Backend Developer", emoji: "🔧", desc: "Architected the Firebase database structure and booking system." },
 ]
 
 const About = () => {
